@@ -15,23 +15,27 @@ async def get_all_users():
 
 @user.get('/users/{id}')
 async def get_user(id:str):
-    user = userEntity(collection_name.find({'_id':ObjectId(id)}))
+    user = userEntity(collection_name.find_one({'_id':ObjectId(id)}))
     return {'Message': 'Single User Done', 'data': user}
 
 @user.post('/users')
 async def create_new_user(user:User):
     _id= collection_name.insert_one(dict(user))
-    newuser = userEntity(collection_name.find({'_id':_id.inserted_id}))
+    newuser = userEntity(collection_name.find_one({'_id':_id.inserted_id}))
     return {'Message': 'New User Done', 'data': newuser}
 
     return{'data': 'Create a new User'}
 
 
 @user.put('/users/{id}')
-def modify_user():
-    return{'data': 'Modify User'}
+async def modify_user(id:str, user:User):
+    userEntity(collection_name.find_one_and_update({'_id':ObjectId(id)},{
+        '$set':dict(user)
+    }))
+    return{'message':'User updated','data': {'User_id':id,'data_mod':user}}
 
 @user.delete('/users/{id}')
-def delete_user():
-    return{'data': 'Delete User'}
+async def delete_user(id:str):
+    user= userEntity(collection_name.find_one_and_delete({'_id':ObjectId(id)}))
+    return{'message': 'Usewr deleted','data': []}
 
